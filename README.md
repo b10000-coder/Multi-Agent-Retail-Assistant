@@ -1,5 +1,4 @@
-# Multi-Agent-Retail-Assistant
-multi-agent retail assistant on Google ADK and Vertex AI; an orchestrator routes questions to BigQuery analytics (via MCP) and RAG agents, with citations, guardrails and LLM-as-judge evals
+# Multi-Agent Retail Assistant
 
 > 🚧 **Work in progress.** The architecture and design are final; implementation is underway. See [Roadmap](#roadmap) for current status.
 
@@ -84,23 +83,28 @@ Every PR runs the eval set in GitHub Actions: routing accuracy, tool trajectory 
 
 ---
 
-## Repository structure (planned)
+## Repository structure
 
 ```
-app/            FastAPI app, SSE endpoint, ADK runner
-agents/         orchestrator, specialist agents, guardrail callbacks
-semantic/       metrics.yaml, spec → SQL compiler, query cache
-mcp/            MCP Toolbox config (BigQuery tools)
-evals/          eval sets, LLM-as-judge, baseline scores
-scripts/        synthetic data generation, document upload
-tests/          unit and integration tests
+retail_agent/             ADK agent package (discovered by `adk web` / `adk eval`)
+├── agent.py              root_agent: the orchestrator
+├── prompts.py            all agent instructions in one place
+├── guardrails.py         input/output callbacks
+├── specialists/          sales analytics, product catalog, policy Q&A agents
+└── semantic/             metrics.yaml, spec → SQL compiler, query cache
+app/                      FastAPI app, SSE endpoint
+toolbox/                  MCP Toolbox config (BigQuery tools)
+evals/                    eval sets, LLM-as-judge, baseline scores
+scripts/                  synthetic data generation, document upload
+tests/                    unit and integration tests
 ```
 
 ---
 
 ## Roadmap
 
-- [ ] Synthetic sales data (stores, products, daily sales) loaded to BigQuery
+- [x] Project setup: uv, ruff, pytest, GCP project, minimal ADK orchestrator running on Vertex AI
+- [x] Synthetic sales data (stores, products, promotions, daily sales) loaded to BigQuery
 - [ ] Synthetic policy docs and weekly catalog indexed in Vertex AI Search
 - [ ] Sales analytics agent with MCP Toolbox
 - [ ] Semantic layer and SQL compiler (with unit tests)
@@ -117,4 +121,18 @@ tests/          unit and integration tests
 
 ## Getting started
 
-Setup instructions will be added once the first agent is runnable.
+Requires Python 3.12, [uv](https://docs.astral.sh/uv/), and a GCP project with billing and the Vertex AI API enabled.
+
+```bash
+uv sync
+gcloud auth application-default login
+cp .env.example retail_agent/.env      # set GOOGLE_CLOUD_PROJECT
+uv run adk web                         # http://127.0.0.1:8000
+```
+
+Generate the synthetic dataset:
+
+```bash
+uv run python scripts/generate_data.py --local   # parquet files in data/, no GCP needed
+uv run python scripts/generate_data.py           # load to BigQuery (dataset: retail)
+```
