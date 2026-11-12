@@ -106,7 +106,7 @@ tests/                    unit and integration tests
 - [x] Project setup: uv, ruff, pytest, GCP project, minimal ADK orchestrator running on Vertex AI
 - [x] Synthetic sales data (stores, products, promotions, daily sales) loaded to BigQuery
 - [x] Semantic layer and SQL compiler (with unit tests)
-- [ ] Sales analytics agent with MCP Toolbox
+- [x] Sales analytics agent with MCP Toolbox
 - [ ] Synthetic policy docs and weekly catalog indexed in Vertex AI Search
 - [ ] Product catalog and policy Q&A agents (RAG with citations)
 - [ ] Orchestrator with `AgentTool` routing

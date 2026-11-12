@@ -1,0 +1,24 @@
+# MCP Toolbox for Databases config.
+# Run:  toolbox --config toolbox/tools.yaml      (serves MCP on http://127.0.0.1:5000)
+#
+# Toolbox authenticates to BigQuery with Application Default Credentials.
+# The agent process only talks to Toolbox; it never holds BigQuery credentials.
+
+kind: source
+name: retail-bq
+type: bigquery
+project: retail-agent-bk
+location: EU
+writeMode: blocked          # SELECT only; INSERT/UPDATE/DELETE/DDL are rejected by Toolbox
+maxQueryResultRows: 1000    # default is 50; matches QuerySpec.limit max
+---
+kind: tool
+name: execute_sql
+type: bigquery-execute-sql
+source: retail-bq
+description: Executes a read-only BigQuery SQL statement against the retail dataset.
+---
+kind: toolset
+name: analytics
+tools:
+  - execute_sql

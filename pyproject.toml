@@ -15,6 +15,7 @@ dependencies = [
     "pandas-gbq>=0.35.3",
     "pyarrow>=26.0.1",
     "pyyaml>=6.0.3",
+    "toolbox-core>=1.4.0",
     "uvicorn>=0.54.0",
 ]
 
@@ -30,3 +31,4 @@ dev = [
 pythonpath = ["."]
 markers = ["integration: hits real GCP services"]
 asyncio_default_fixture_loop_scope = "function"
+asyncio_mode = "auto"
