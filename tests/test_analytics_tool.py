@@ -16,6 +16,7 @@ def captured(monkeypatch: pytest.MonkeyPatch) -> list[str]:
         return [{"product": "Gofret Tekli", "units_sold": 1281}]
 
     monkeypatch.setattr(analytics, "_executor", fake_executor)
+    analytics._cache.clear()
     return sqls
 
 
@@ -53,3 +54,35 @@ def test_instruction_contains_catalog_and_today() -> None:
     assert "units_sold" in text
     assert "district" in text
     assert "Bugünün tarihi" in text
+
+
+KADIKOY = {
+    "metrics": ["units_sold"],
+    "dimensions": ["product"],
+    "start_date": "2026-10-01",
+    "end_date": "2026-10-31",
+    "limit": 5,
+}
+
+
+async def test_same_spec_hits_cache(captured: list[str]) -> None:
+    first = await analytics.run_query(**KADIKOY, filters={"district": ["Kadıköy"]})
+    second = await analytics.run_query(**KADIKOY, filters={"district": ["Kadıköy"]})
+    assert (first["cache"], second["cache"]) == ("miss", "hit")
+    assert second["rows"] == first["rows"]
+    assert len(captured) == 1  # BigQuery queried once
+
+
+async def test_different_filter_misses_cache(captured: list[str]) -> None:
+    await analytics.run_query(**KADIKOY, filters={"district": ["Kadıköy"]})
+    other = await analytics.run_query(**KADIKOY, filters={"district": ["Ataşehir"]})
+    assert other["cache"] == "miss"
+    assert len(captured) == 2  # the Kadıköy answer is never served for Ataşehir
+
+
+async def test_filter_order_does_not_matter(captured: list[str]) -> None:
+    a = {"district": ["Kadıköy"], "category": ["Temizlik"]}
+    b = {"category": ["Temizlik"], "district": ["Kadıköy"]}
+    await analytics.run_query(**KADIKOY, filters=a)
+    second = await analytics.run_query(**KADIKOY, filters=b)
+    assert second["cache"] == "hit"

@@ -14,6 +14,7 @@ from pydantic import ValidationError
 
 from retail_agent import config, prompts
 from retail_agent.guardrails import output_guardrail, record_tool_evidence
+from retail_agent.semantic.cache import QueryCache
 from retail_agent.semantic.compiler import QuerySpec, SemanticError, compile_spec, default_model
 
 # Range covered by the synthetic dataset (scripts/generate_data.py, size=small).
@@ -40,6 +41,7 @@ async def toolbox_execute_sql(sql: str) -> Any:
 
 # Swappable for tests: tests replace this with a fake executor.
 _executor: SqlExecutor = toolbox_execute_sql
+_cache = QueryCache()
 
 
 async def run_query(
@@ -65,7 +67,7 @@ async def run_query(
         limit: Maximum rows to return (1-1000).
 
     Returns:
-        {"status": "ok", "rows": [...], "row_count": n, "sql": "..."} on success,
+        {"status": "ok", "rows": [...], "row_count": n, "sql": "...", "cache": "hit"|"miss"} on success,
         {"status": "error", "message": "..."} if the request is invalid (fix and retry).
     """
     try:
@@ -84,10 +86,17 @@ async def run_query(
         # Returned to the model, not raised: the agent reads the message and corrects its call.
         return {"status": "error", "message": str(e)}
 
-    logger.info("run_query executing:\n%s", sql)
-    rows = await _executor(sql)
+    rows = _cache.get(sql)
+    cache_status = "hit"
+    if rows is None:
+        cache_status = "miss"
+        logger.info("run_query executing:\n%s", sql)
+        rows = await _executor(sql)
+        _cache.set(sql, rows)
+    else:
+        logger.info("run_query cache hit (hits=%d misses=%d)", _cache.hits, _cache.misses)
     row_list = rows if isinstance(rows, list) else []
-    return {"status": "ok", "rows": rows, "row_count": len(row_list), "sql": sql}
+    return {"status": "ok", "rows": rows, "row_count": len(row_list), "sql": sql, "cache": cache_status}
 
 
 def _instruction(_: ReadonlyContext) -> str:

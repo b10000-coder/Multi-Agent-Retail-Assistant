@@ -111,7 +111,7 @@ tests/                    unit and integration tests
 - [x] Product catalog and policy Q&A agents (RAG with citations)
 - [x] Orchestrator with `AgentTool` routing
 - [x] Input and output guardrails
-- [ ] Query-spec cache
+- [x] Query-spec cache
 - [ ] FastAPI with SSE streaming
 - [ ] Eval set, LLM-as-judge, CI regression check
 - [ ] Deploy to Cloud Run
