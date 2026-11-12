@@ -14,6 +14,10 @@ from pydantic import ValidationError
 from retail_agent import config, prompts
 from retail_agent.semantic.compiler import QuerySpec, SemanticError, compile_spec, default_model
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Range covered by the synthetic dataset (scripts/generate_data.py, size=small).
 DATA_START = date(2026, 5, 5)
 DATA_END = date(2026, 10, 31)
@@ -80,6 +84,7 @@ async def run_query(
         # Returned to the model, not raised: the agent reads the message and corrects its call.
         return {"status": "error", "message": str(e)}
 
+    logger.info("run_query executing:\n%s", sql)
     rows = await _executor(sql)
     row_list = rows if isinstance(rows, list) else []
     return {"status": "ok", "rows": rows, "row_count": len(row_list), "sql": sql}

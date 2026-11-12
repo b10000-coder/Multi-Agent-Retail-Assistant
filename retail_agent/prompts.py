@@ -35,6 +35,9 @@ Kurallar:
   Tarihleri YYYY-MM-DD formatında ver.
 - "En çok satan" ifadesinde varsayılan metrik units_sold'dur. Cevapta "adet bazında" diye belirt.
 - Filtre değerlerini kullanıcının yazdığı gibi, Türkçe karakterleriyle ver (ör. "Kadıköy", "İstanbul").
+- Kendin aritmetik yapma: toplam, yüzde, fark veya oran hesaplama.
+  Pay/yüzde gerekiyorsa revenue_share veya units_share metriğini sorguya ekle.
+  Genel toplam gerekiyorsa boyutsuz ikinci bir sorgu çalıştır.
 - Araç hata dönerse mesajı oku, parametreleri düzelt ve bir kez daha dene.
 - Sonuç boşsa bunu açıkça söyle; sayı uydurma.
 - Cevapta kullandığın tarih aralığını ve filtreleri belirt.

@@ -35,6 +35,16 @@ metrics:
     sql: SAFE_DIVIDE(SUM(s.quantity * s.unit_price), SUM(s.quantity))
     description: Average price paid per unit, weighted by quantity, in TRY.
     synonyms: [ortalama fiyat, ortalama satış fiyatı]
+  revenue_share:
+    # Share of the total across all groups in the result (computed before LIMIT, so
+    # "top 5 regions" still shows each region's share of the full total).
+    sql: SAFE_DIVIDE(SUM(s.quantity * s.unit_price), SUM(SUM(s.quantity * s.unit_price)) OVER ())
+    description: Each group's share of total revenue, between 0 and 1. Use with a dimension.
+    synonyms: [ciro payı, pay, yüzde, oran, dağılım]
+  units_share:
+    sql: SAFE_DIVIDE(SUM(s.quantity), SUM(SUM(s.quantity)) OVER ())
+    description: Each group's share of total units sold, between 0 and 1. Use with a dimension.
+    synonyms: [adet payı, satış payı]
   active_stores:
     sql: COUNT(DISTINCT s.store_id)
     description: Number of stores with at least one sale.

@@ -156,3 +156,35 @@ def test_kadikoy_top5_against_bigquery() -> None:
         ("Yayla Toz Şeker 1 kg", 402),
         ("Siyah Zeytin 500 g", 383),
     ]
+
+
+def test_revenue_share_uses_window_over_groups() -> None:
+    sql = compile_(
+        QuerySpec(
+            metrics=["revenue", "revenue_share"],
+            dimensions=["region"],
+            start_date=date(2026, 10, 1),
+            end_date=date(2026, 10, 31),
+        )
+    )
+    assert (
+        "SAFE_DIVIDE(SUM(s.quantity * s.unit_price), SUM(SUM(s.quantity * s.unit_price)) OVER ()) AS revenue_share"
+        in sql
+    )
+    assert "GROUP BY 1" in sql
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(os.environ.get("RUN_BQ_TESTS") != "1", reason="set RUN_BQ_TESTS=1 to hit BigQuery")
+def test_region_revenue_shares_sum_to_one() -> None:
+    from google.cloud import bigquery
+
+    spec = QuerySpec(
+        metrics=["revenue", "revenue_share"],
+        dimensions=["region"],
+        start_date=date(2026, 10, 1),
+        end_date=date(2026, 10, 31),
+    )
+    rows = list(bigquery.Client().query(compile_spec(spec)).result())
+    assert len(rows) == 5
+    assert abs(sum(r["revenue_share"] for r in rows) - 1.0) < 1e-9
