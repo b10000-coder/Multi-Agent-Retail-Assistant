@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import Awaitable, Callable
 from datetime import date
 from typing import Any
@@ -12,15 +13,14 @@ from google.adk.agents.readonly_context import ReadonlyContext
 from pydantic import ValidationError
 
 from retail_agent import config, prompts
+from retail_agent.guardrails import output_guardrail, record_tool_evidence
 from retail_agent.semantic.compiler import QuerySpec, SemanticError, compile_spec, default_model
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 # Range covered by the synthetic dataset (scripts/generate_data.py, size=small).
 DATA_START = date(2026, 5, 5)
 DATA_END = date(2026, 10, 31)
+
+logger = logging.getLogger(__name__)
 
 SqlExecutor = Callable[[str], Awaitable[Any]]
 
@@ -106,4 +106,6 @@ sales_analytics_agent = LlmAgent(
     description=prompts.SALES_ANALYTICS_DESCRIPTION,
     instruction=_instruction,
     tools=[run_query],
+    after_tool_callback=record_tool_evidence,
+    after_model_callback=output_guardrail,
 )

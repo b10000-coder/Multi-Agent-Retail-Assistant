@@ -9,6 +9,7 @@ from google.adk.agents import LlmAgent
 from google.adk.agents.readonly_context import ReadonlyContext
 
 from retail_agent import config, prompts, search
+from retail_agent.guardrails import output_guardrail, record_tool_evidence
 
 
 async def search_catalog(query: str) -> dict[str, Any]:
@@ -38,4 +39,6 @@ product_catalog_agent = LlmAgent(
     description=prompts.PRODUCT_CATALOG_DESCRIPTION,
     instruction=_instruction,
     tools=[search_catalog],
+    after_tool_callback=record_tool_evidence,
+    after_model_callback=output_guardrail,
 )

@@ -110,7 +110,7 @@ tests/                    unit and integration tests
 - [x] Synthetic policy docs and weekly catalog indexed in Vertex AI Search
 - [x] Product catalog and policy Q&A agents (RAG with citations)
 - [x] Orchestrator with `AgentTool` routing
-- [ ] Input and output guardrails
+- [x] Input and output guardrails
 - [ ] Query-spec cache
 - [ ] FastAPI with SSE streaming
 - [ ] Eval set, LLM-as-judge, CI regression check
@@ -136,3 +136,14 @@ Generate the synthetic dataset:
 uv run python scripts/generate_data.py --local   # parquet files in data/, no GCP needed
 uv run python scripts/generate_data.py           # load to BigQuery (dataset: retail)
 ```
+
+
+## Production notes
+
+What I'd change before running this for real:
+
+- **Guardrails:** keep the regex rules as a cheap first layer; add Model Armor (or an LLM classifier) for prompt injection and Cloud DLP for PII.
+- **PII in session storage:** masking currently applies to model requests; the API layer should mask before messages are written to the session store.
+- **Retrieval:** corpus docs are short, so extractive segments return near-full documents. For long documents, enable layout-based chunking and search in CHUNKS mode.
+- **Data residency:** Vertex AI Search data stores are in `global`; for KVKK, use the `eu` multi-region.
+- **MCP Toolbox:** restrict `--allowed-origins` and `--allowed-hosts`; use a read-only service account scoped to the `retail` dataset.

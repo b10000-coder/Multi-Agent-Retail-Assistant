@@ -7,6 +7,7 @@ from typing import Any
 from google.adk.agents import LlmAgent
 
 from retail_agent import config, prompts, search
+from retail_agent.guardrails import output_guardrail, record_tool_evidence
 
 
 async def search_policies(query: str) -> dict[str, Any]:
@@ -28,4 +29,6 @@ policy_qa_agent = LlmAgent(
     description=prompts.POLICY_QA_DESCRIPTION,
     instruction=prompts.POLICY_QA_INSTRUCTION,
     tools=[search_policies],
+    after_tool_callback=record_tool_evidence,
+    after_model_callback=output_guardrail,
 )
