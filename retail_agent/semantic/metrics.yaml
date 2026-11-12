@@ -1,0 +1,102 @@
+# Semantic layer for the retail dataset.
+#
+# The analytics agent never writes SQL. It picks metrics, dimensions and filters
+# by name from this file; compiler.py turns that choice into SQL.
+#
+# - metrics:     aggregations (what to measure)
+# - dimensions:  attributes to group or filter by (how to slice)
+# - synonyms:    Turkish words users actually type; shown to the LLM to help it map
+#                "ciro" -> revenue, "ilçe" -> district, etc.
+
+base_table:
+  name: sales
+  alias: s
+  time_column: s.sale_date
+
+# Joined only when a selected dimension or filter needs them. Order here = order in SQL.
+joins:
+  products:
+    alias: p
+    condition: s.product_id = p.product_id
+  stores:
+    alias: st
+    condition: s.store_id = st.store_id
+
+metrics:
+  units_sold:
+    sql: SUM(s.quantity)
+    description: Total units sold.
+    synonyms: [satış adedi, adet, en çok satan, kaç tane satıldı]
+  revenue:
+    sql: SUM(s.quantity * s.unit_price)
+    description: Total sales revenue in TRY.
+    synonyms: [ciro, satış tutarı, gelir, hasılat]
+  avg_unit_price:
+    sql: SAFE_DIVIDE(SUM(s.quantity * s.unit_price), SUM(s.quantity))
+    description: Average price paid per unit, weighted by quantity, in TRY.
+    synonyms: [ortalama fiyat, ortalama satış fiyatı]
+  active_stores:
+    sql: COUNT(DISTINCT s.store_id)
+    description: Number of stores with at least one sale.
+    synonyms: [mağaza sayısı, satış yapan mağaza]
+  active_products:
+    sql: COUNT(DISTINCT s.product_id)
+    description: Number of distinct products sold.
+    synonyms: [ürün çeşidi, kaç farklı ürün]
+
+dimensions:
+  product:
+    sql: p.product_name
+    join: products
+    description: Product name including pack size, e.g. "Süt 1 L".
+    synonyms: [ürün, ürün adı]
+  category:
+    sql: p.category
+    join: products
+    description: Product category, e.g. "Süt Ürünleri", "Temizlik".
+    synonyms: [kategori, reyon]
+  brand_type:
+    sql: p.brand_type
+    join: products
+    description: '"Özel Marka" (private label) or "Ulusal Marka" (national brand).'
+    synonyms: [marka tipi, özel marka, ulusal marka]
+  store:
+    sql: st.store_name
+    join: stores
+    description: Store name, e.g. "Kadıköy #0001".
+    synonyms: [mağaza, şube]
+  district:
+    sql: st.district
+    join: stores
+    description: District (ilçe), e.g. "Kadıköy", "Çankaya".
+    synonyms: [ilçe, semt]
+  city:
+    sql: st.city
+    join: stores
+    description: City (il), e.g. "İstanbul", "Ankara".
+    synonyms: [il, şehir]
+  region:
+    sql: st.region
+    join: stores
+    description: Region, e.g. "Marmara", "Ege", "İç Anadolu".
+    synonyms: [bölge]
+  store_size:
+    sql: st.store_size
+    join: stores
+    description: '"Küçük", "Orta" or "Büyük".'
+    synonyms: [mağaza büyüklüğü, mağaza tipi]
+  date:
+    sql: s.sale_date
+    description: Day of sale.
+    synonyms: [gün, günlük, tarih]
+    filterable: false   # use start_date / end_date instead
+  week:
+    sql: DATE_TRUNC(s.sale_date, WEEK(MONDAY))
+    description: Week of sale (Monday start).
+    synonyms: [hafta, haftalık]
+    filterable: false
+  month:
+    sql: DATE_TRUNC(s.sale_date, MONTH)
+    description: Month of sale.
+    synonyms: [ay, aylık]
+    filterable: false
