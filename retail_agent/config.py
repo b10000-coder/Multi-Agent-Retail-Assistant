@@ -9,3 +9,7 @@ MODEL_ID = os.environ.get("MODEL_ID", "gemini-3.8-flash")
 
 # MCP Toolbox server that holds the BigQuery credentials.
 TOOLBOX_URL = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
+
+# Vertex AI Search serving configs, printed by scripts/setup_search.py.
+POLICY_SERVING_CONFIG = os.environ.get("POLICY_SERVING_CONFIG", "")
+CATALOG_SERVING_CONFIG = os.environ.get("CATALOG_SERVING_CONFIG", "")

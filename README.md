@@ -107,9 +107,9 @@ tests/                    unit and integration tests
 - [x] Synthetic sales data (stores, products, promotions, daily sales) loaded to BigQuery
 - [x] Semantic layer and SQL compiler (with unit tests)
 - [x] Sales analytics agent with MCP Toolbox
-- [ ] Synthetic policy docs and weekly catalog indexed in Vertex AI Search
-- [ ] Product catalog and policy Q&A agents (RAG with citations)
-- [ ] Orchestrator with `AgentTool` routing
+- [x] Synthetic policy docs and weekly catalog indexed in Vertex AI Search
+- [x] Product catalog and policy Q&A agents (RAG with citations)
+- [x] Orchestrator with `AgentTool` routing
 - [ ] Input and output guardrails
 - [ ] Query-spec cache
 - [ ] FastAPI with SSE streaming
