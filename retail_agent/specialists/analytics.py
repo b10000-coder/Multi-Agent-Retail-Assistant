@@ -102,7 +102,7 @@ async def run_query(
 def _instruction(_: ReadonlyContext) -> str:
     # A callable instruction so "today" is evaluated per request, not at import time.
     return prompts.SALES_ANALYTICS_INSTRUCTION.format(
-        today=date.today().isoformat(),
+        today=config.today().isoformat(),
         data_start=DATA_START.isoformat(),
         data_end=DATA_END.isoformat(),
         catalog=default_model().describe(),

@@ -28,6 +28,8 @@ from google.adk.tools.base_tool import BaseTool
 from google.adk.tools.tool_context import ToolContext
 from google.genai import types
 
+from retail_agent import tracing
+
 logger = logging.getLogger(__name__)
 
 BLOCKED_MESSAGE = "Bu isteği işleyemiyorum. Mağaza operasyonlarıyla ilgili bir soru sorabilirsiniz."
@@ -227,6 +229,7 @@ def record_tool_evidence(
     tool: BaseTool, args: dict[str, Any], tool_context: ToolContext, tool_response: Any
 ) -> dict | None:
     """after_tool_callback: remember what the tool actually returned."""
+    tracing.record(tool_context.agent_name, getattr(tool, "name", "?"), args, tool_response)
     numbers: set[float] = set(tool_context.state.get(_key(tool_context, "numbers"), []))
     _collect_numbers(tool_response, numbers)
     _collect_numbers(args, numbers)
@@ -242,7 +245,12 @@ def record_tool_evidence(
     if isinstance(tool_response, dict) and isinstance(tool_response.get("result"), str):
         text = tool_response["result"]
     if text:
-        ids.update(int(n) for n in _CITATION.findall(text))
+        # The orchestrator may merge several specialists' answers and renumber their citations
+        # ([1] from policy + [1] from catalog -> [1], [2]), so valid ids are 1..total cited so far.
+        cited = {int(n) for n in _CITATION.findall(text)}
+        if cited:
+            offset = max(ids, default=0)
+            ids.update(range(1, offset + max(cited) + 1))
     tool_context.state[_key(tool_context, "source_ids")] = sorted(ids)
     return None  # keep the original tool response
 

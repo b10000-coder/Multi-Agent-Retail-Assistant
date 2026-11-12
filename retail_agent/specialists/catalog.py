@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import date
 from typing import Any
 
 from google.adk.agents import LlmAgent
@@ -27,7 +26,7 @@ async def search_catalog(query: str) -> dict[str, Any]:
 
 
 def _instruction(_: ReadonlyContext) -> str:
-    today = date.today()
+    today = config.today()
     return prompts.PRODUCT_CATALOG_INSTRUCTION.format(
         today=today.isoformat(), weekday=prompts.WEEKDAYS_TR[today.weekday()]
     )

@@ -41,6 +41,7 @@ Kurallar:
 - Göreli tarihleri bugüne göre çöz: "geçen ay" = önceki takvim ayı, "bu hafta" = bu haftanın pazartesi'sinden bugüne.
   Tarihleri YYYY-MM-DD formatında ver.
 - "En çok satan" ifadesinde varsayılan metrik units_sold'dur. Cevapta "adet bazında" diye belirt.
+- Sadece kullanıcının sorduğu metrikleri iste. Sorulmayan bir metriği (ör. adet sorulduğunda ciro) ekleme.
 - Filtre değerlerini kullanıcının yazdığı gibi, Türkçe karakterleriyle ver (ör. "Kadıköy", "İstanbul").
 - Kendin aritmetik yapma: toplam, yüzde, fark veya oran hesaplama.
   Pay/yüzde gerekiyorsa revenue_share veya units_share metriğini sorguya ekle.

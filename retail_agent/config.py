@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import date
 
 # Model IDs get retired; keep them out of code so a retirement is a one-line .env change.
 MODEL_ID = os.environ.get("MODEL_ID", "gemini-3.8-flash")
@@ -13,3 +14,12 @@ TOOLBOX_URL = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
 # Vertex AI Search serving configs, printed by scripts/setup_search.py.
 POLICY_SERVING_CONFIG = os.environ.get("POLICY_SERVING_CONFIG", "")
 CATALOG_SERVING_CONFIG = os.environ.get("CATALOG_SERVING_CONFIG", "")
+
+
+def today() -> date:
+    """Today's date, overridable so evals with relative dates ("geçen ay") are reproducible.
+
+    TODAY_OVERRIDE=2026-11-13 makes "geçen ay" always mean October 2026, whenever the eval runs.
+    """
+    override = os.environ.get("TODAY_OVERRIDE")
+    return date.fromisoformat(override) if override else date.today()

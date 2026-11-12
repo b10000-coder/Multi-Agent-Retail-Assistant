@@ -160,3 +160,14 @@ def test_orchestrator_evidence_from_specialist_text() -> None:
     ctx = SimpleNamespace(state={}, agent_name="orchestrator")
     g.record_tool_evidence(None, {"request": "..."}, ctx, "Marmara 39.044.323,59 TL (%55,64) [1]")  # type: ignore[arg-type]
     assert g.output_guardrail(ctx, _final("Marmara: 39.044.323,59 TL, pay %55,64 [1]")) is None  # type: ignore[arg-type]
+
+
+def test_orchestrator_may_renumber_merged_citations() -> None:
+    ctx = SimpleNamespace(state={}, agent_name="orchestrator")
+    g.record_tool_evidence(None, {"request": "a"}, ctx, "Satış: Gofret 1.281 adet.")  # type: ignore[arg-type]
+    g.record_tool_evidence(None, {"request": "b"}, ctx, "Katalogda yok [1].")  # type: ignore[arg-type]
+    g.record_tool_evidence(None, {"request": "c"}, ctx, "Kural şu [1].")  # type: ignore[arg-type]
+    ok = g.output_guardrail(ctx, _final("Gofret 1.281 adet; katalogda yok [1]; kural [2]."))  # type: ignore[arg-type]
+    assert ok is None
+    bad = g.output_guardrail(ctx, _final("Kural [3]."))  # type: ignore[arg-type]
+    assert bad is not None

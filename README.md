@@ -112,8 +112,9 @@ tests/                    unit and integration tests
 - [x] Orchestrator with `AgentTool` routing
 - [x] Input and output guardrails
 - [x] Query-spec cache
+- [x] Eval set (14 cases), deterministic checks + LLM-as-judge, baseline comparison
+- [ ] CI: lint, unit tests and eval regression check in GitHub Actions
 - [ ] FastAPI with SSE streaming
-- [ ] Eval set, LLM-as-judge, CI regression check
 - [ ] Deploy to Cloud Run
 - [ ] Eval results and demo GIF in this README
 

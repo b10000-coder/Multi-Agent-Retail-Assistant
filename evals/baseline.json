@@ -1,0 +1,10 @@
+{
+  "cases": 14,
+  "pass_rate": 1,
+  "routing_accuracy": 1,
+  "tool_call_accuracy": 1,
+  "content_accuracy": 1,
+  "guardrail_accuracy": 1,
+  "judge_mean": 5,
+  "critical_failures": []
+}
