@@ -78,9 +78,11 @@ jobs:
       - name: Start MCP Toolbox
         if: steps.changes.outputs.run != 'false'
         run: |
-          curl -sSfL -o toolbox "https://storage.googleapis.com/mcp-toolbox-for-databases/v${TOOLBOX_VERSION}/linux/amd64/toolbox"
-          chmod +x toolbox
-          ./toolbox --config toolbox/tools.yaml > toolbox.log 2>&1 &
+          # Download outside the repo: ./toolbox is the config directory
+          TOOLBOX_BIN="$RUNNER_TEMP/toolbox-bin"
+          curl -sSfL -o "$TOOLBOX_BIN" "https://storage.googleapis.com/mcp-toolbox-for-databases/v${TOOLBOX_VERSION}/linux/amd64/toolbox"
+          chmod +x "$TOOLBOX_BIN"
+          "$TOOLBOX_BIN" --config toolbox/tools.yaml > toolbox.log 2>&1 &
           for i in $(seq 1 30); do
             if curl -s -o /dev/null http://127.0.0.1:5000/; then echo "Toolbox is up"; exit 0; fi
             sleep 1
