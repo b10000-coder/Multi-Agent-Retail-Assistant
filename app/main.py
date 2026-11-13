@@ -42,6 +42,8 @@ from google.genai import types
 from retail_agent.agent import root_agent
 from retail_agent.guardrails import mask_pii
 
+from fastapi.staticfiles import StaticFiles
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -59,6 +61,7 @@ session_service = InMemorySessionService()
 runner = Runner(app_name=APP_NAME, agent=root_agent, session_service=session_service)
 
 app = FastAPI(title="Multi-Agent Retail Assistant")
+app.mount("/static", StaticFiles(directory=Path(__file__).with_name("static")), name="static")
 
 
 class ChatRequest(BaseModel):

@@ -7,7 +7,9 @@
 <style>
   body { font: 15px/1.5 system-ui, sans-serif; max-width: 760px; margin: 0 auto; padding: 24px; color: #1a1a1a; }
   h1 { font-size: 18px; margin: 0 0 4px; }
-  .sub { color: #666; font-size: 13px; margin-bottom: 16px; }
+  header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .logo { height: 60px; width: auto; }
+  .sub { color: #666; font-size: 13px; }
   #log { border-top: 1px solid #ddd; }
   .msg { padding: 12px 0; border-bottom: 1px solid #eee; white-space: pre-wrap; }
   .user { font-weight: 600; }
@@ -21,8 +23,13 @@
 </style>
 </head>
 <body>
-<h1>Mağaza Operasyon Asistanı</h1>
-<div class="sub">Satış analitiği (BigQuery) · Politika dokümanları · Aktüel katalog — tüm veriler sentetiktir.</div>
+<header>
+  <img src="/static/logo.png" alt="Logo" class="logo">
+  <div>
+    <h1>Mağaza Operasyon Asistanı</h1>
+    <div class="sub">Satış analitiği (BigQuery) · Politika dokümanları · Aktüel katalog — tüm veriler sentetiktir.</div>
+  </div>
+</header>
 <div class="examples">
   <button type="button">Geçen ay Kadıköy'de en çok satan 5 ürün ne?</button>
   <button type="button">Müşteri fişsiz iade istiyor, ne yapmalıyım?</button>
