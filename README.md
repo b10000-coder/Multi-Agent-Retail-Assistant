@@ -115,7 +115,7 @@ tests/                    unit and integration tests
 - [x] Input and output guardrails
 - [x] Query-spec cache
 - [x] Eval set (14 cases), deterministic checks + LLM-as-judge, baseline comparison
-- [ ] CI: lint, unit tests and eval regression check in GitHub Actions
+- [x] CI: lint, unit tests and eval regression check in GitHub Actions
 - [ ] FastAPI with SSE streaming
 - [ ] Deploy to Cloud Run
 - [ ] Eval results and demo GIF in this README
