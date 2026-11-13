@@ -103,6 +103,23 @@ def print_table(results: list[dict[str, Any]]) -> None:
                 print(f"    -> judge {r['judge_score']}: {r['judge_reason']}")
 
 
+def write_github_summary(results: list[dict[str, Any]], summary: dict[str, Any], problems: list[str]) -> None:
+    """In GitHub Actions, render the result table on the run / PR checks page."""
+    path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not path:
+        return
+    lines = ["## Eval results", "", "| case | checks | judge | result |", "|---|---|---|---|"]
+    for r in results:
+        checks = " ".join(f"{k}:{'✅' if ok else '❌'}" for k, ok in r["checks"].items()) or "-"
+        judge = "-" if r["judge_score"] is None else str(r["judge_score"])
+        result = "PASS" if r["passed"] else ("**FAIL (critical)**" if r["critical"] else "**FAIL**")
+        lines.append(f"| `{r['id']}` | {checks} | {judge} | {result} |")
+    lines += ["", "```json", json.dumps(summary, indent=2, ensure_ascii=False), "```"]
+    lines += ["", "**Regressions:** " + ("; ".join(problems) if problems else "none")]
+    with open(path, "a", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
+
 async def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--only", default="", help="run cases whose id starts with this prefix")
@@ -146,6 +163,7 @@ async def main() -> int:
         return 1 if summary["critical_failures"] else 0
 
     problems = scoring.regressions(summary, json.loads(baseline_path.read_text()))
+    write_github_summary(results, summary, problems)
     if problems:
         print("\nREGRESSION:\n  " + "\n  ".join(problems))
         return 1

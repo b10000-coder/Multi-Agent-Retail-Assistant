@@ -35,3 +35,8 @@ pythonpath = ["."]
 markers = ["integration: hits real GCP services"]
 asyncio_default_fixture_loop_scope = "function"
 asyncio_mode = "auto"
+
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
