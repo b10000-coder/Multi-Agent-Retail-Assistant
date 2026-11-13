@@ -1,0 +1,64 @@
+# Cloud Run service with two containers sharing localhost:
+#   app      FastAPI + ADK agents, receives traffic on :8080
+#   toolbox  MCP Toolbox for Databases, BigQuery access on 127.0.0.1:5000 (not exposed)
+# Rendered by scripts/deploy_cloud_run.sh, which fills in the dollar-brace placeholders.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ${SERVICE}
+  labels:
+    cloud.googleapis.com/location: ${REGION}
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        # One instance: in-memory sessions stay consistent and cost is capped.
+        # With Agent Engine Sessions (VertexAiSessionService) this can scale out.
+        autoscaling.knative.dev/maxScale: "1"
+        autoscaling.knative.dev/minScale: "0"
+        # Start the app only after Toolbox passes its startup probe.
+        run.googleapis.com/container-dependencies: '{"app": ["toolbox"]}'
+    spec:
+      serviceAccountName: ${RUNTIME_SA}
+      timeoutSeconds: 300          # long enough for a streamed multi-agent answer
+      containerConcurrency: 20
+      containers:
+        - name: app
+          image: ${APP_IMAGE}
+          ports:
+            - containerPort: 8080
+          env:
+            - {name: GOOGLE_GENAI_USE_VERTEXAI, value: "TRUE"}
+            - {name: GOOGLE_CLOUD_PROJECT, value: "${PROJECT_ID}"}
+            - {name: GOOGLE_CLOUD_LOCATION, value: "global"}
+            - {name: MODEL_ID, value: "${MODEL_ID}"}
+            - {name: TOOLBOX_URL, value: "http://127.0.0.1:5000"}
+            - {name: POLICY_SERVING_CONFIG, value: "${POLICY_SERVING_CONFIG}"}
+            - {name: CATALOG_SERVING_CONFIG, value: "${CATALOG_SERVING_CONFIG}"}
+          resources:
+            limits: {cpu: "1", memory: 1Gi}
+          startupProbe:
+            httpGet: {path: /healthz, port: 8080}
+            periodSeconds: 5
+            failureThreshold: 12
+        - name: toolbox
+          image: ${TOOLBOX_IMAGE}
+          # 0.0.0.0 so Cloud Run's startup probe can reach it; only the "app" container's port is
+          # exposed outside the instance, so Toolbox is still reachable only from the app.
+          args: ["--config", "/etc/toolbox/tools.yaml", "--address", "0.0.0.0", "--port", "5000"]
+          resources:
+            limits: {cpu: "1", memory: 512Mi}
+          volumeMounts:
+            - {name: toolbox-config, mountPath: /etc/toolbox}
+          startupProbe:
+            tcpSocket: {port: 5000}
+            periodSeconds: 2
+            failureThreshold: 30
+      volumes:
+        - name: toolbox-config
+          secret:
+            secretName: ${TOOLBOX_SECRET}
+            items:
+              - {key: latest, path: tools.yaml}

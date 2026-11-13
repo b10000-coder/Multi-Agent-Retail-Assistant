@@ -117,7 +117,7 @@ tests/                    unit and integration tests
 - [x] Eval set (14 cases), deterministic checks + LLM-as-judge, baseline comparison
 - [x] CI: lint, unit tests and eval regression check in GitHub Actions
 - [x] FastAPI with SSE streaming
-- [ ] Deploy to Cloud Run
+- [X] Deploy to Cloud Run
 - [ ] Eval results and demo GIF in this README
 
 ---

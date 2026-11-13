@@ -1,0 +1,18 @@
+# Never ship local secrets or state into the image
+**/.env
+**/.adk
+.venv
+.git
+.github
+data
+build
+corpus
+evals
+tests
+scripts
+toolbox
+deploy
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/.DS_Store

@@ -1,0 +1,19 @@
+# Files NOT uploaded to Cloud Build (the Dockerfile only needs pyproject.toml, uv.lock, app/, retail_agent/)
+.gcloudignore
+.git
+.github
+.venv
+**/.env
+**/.adk
+data
+build
+corpus
+evals
+tests
+scripts
+toolbox
+deploy
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/.DS_Store
