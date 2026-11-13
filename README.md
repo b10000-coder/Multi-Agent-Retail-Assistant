@@ -15,6 +15,8 @@ A multi-agent AI assistant for retail store operations, built on **Google ADK** 
 
 Regional managers and store staff ask questions in Turkish. An orchestrator routes each question to a specialist agent: sales analytics over BigQuery, weekly catalog search, or company policy Q&A. Numbers come from queries, rules come from documents, and every answer cites its source. Guardrails run in code, and a 14-case eval suite gates every pull request.
 
+[![Retail Market Assistant Demo ChatBot AI-101](assets/AI-101-retail-assistant.gif)](https://youtube.com/shorts/jjqhcmJnWOg)
+
 All data in this repository is synthetic.
 
 <!-- Demo: record the chat page (status messages + streamed answer) and save as docs/demo.gif
