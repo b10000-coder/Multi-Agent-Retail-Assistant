@@ -171,3 +171,9 @@ def test_orchestrator_may_renumber_merged_citations() -> None:
     assert ok is None
     bad = g.output_guardrail(ctx, _final("Kural [3]."))  # type: ignore[arg-type]
     assert bad is not None
+
+
+def test_output_guardrail_skips_streaming_chunks() -> None:
+    ctx = SimpleNamespace(state={}, agent_name="orchestrator")
+    chunk = LlmResponse(content=types.Content(role="model", parts=[types.Part(text="Ciro 45.000 TL")]), partial=True)
+    assert g.output_guardrail(ctx, chunk) is None  # type: ignore[arg-type]

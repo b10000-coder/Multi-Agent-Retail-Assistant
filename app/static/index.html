@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mağaza Operasyon Asistanı</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; max-width: 760px; margin: 0 auto; padding: 24px; color: #1a1a1a; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .sub { color: #666; font-size: 13px; margin-bottom: 16px; }
+  #log { border-top: 1px solid #ddd; }
+  .msg { padding: 12px 0; border-bottom: 1px solid #eee; white-space: pre-wrap; }
+  .user { font-weight: 600; }
+  .status { color: #888; font-size: 13px; font-style: italic; }
+  .warn { color: #a15c00; }
+  form { display: flex; gap: 8px; margin-top: 16px; }
+  input { flex: 1; padding: 10px; font: inherit; border: 1px solid #ccc; border-radius: 6px; }
+  button { padding: 10px 16px; font: inherit; border: 0; border-radius: 6px; background: #1a1a1a; color: #fff; cursor: pointer; }
+  button:disabled { opacity: .4; }
+  .examples button { background: #f2f2f2; color: #1a1a1a; font-size: 13px; padding: 6px 10px; margin: 0 6px 6px 0; }
+</style>
+</head>
+<body>
+<h1>Mağaza Operasyon Asistanı</h1>
+<div class="sub">Satış analitiği (BigQuery) · Politika dokümanları · Aktüel katalog — tüm veriler sentetiktir.</div>
+<div class="examples">
+  <button type="button">Geçen ay Kadıköy'de en çok satan 5 ürün ne?</button>
+  <button type="button">Müşteri fişsiz iade istiyor, ne yapmalıyım?</button>
+  <button type="button">Bu haftaki aktüelde bebek ürünü var mı?</button>
+</div>
+<div id="log"></div>
+<form id="f"><input id="q" autocomplete="off" placeholder="Bir soru sorun..."><button id="send">Gönder</button></form>
+<script>
+let sessionId = null;
+const log = document.getElementById("log"), form = document.getElementById("f"),
+      input = document.getElementById("q"), send = document.getElementById("send");
+
+function add(cls, text) {
+  const div = document.createElement("div");
+  div.className = "msg " + cls;
+  div.textContent = text;
+  log.appendChild(div);
+  div.scrollIntoView({ block: "end" });
+  return div;
+}
+
+async function ask(question) {
+  add("user", question);
+  const status = add("status", "Düşünüyor...");
+  const answer = add("answer", "");
+  send.disabled = true;
+  try {
+    const resp = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: question, session_id: sessionId }),
+    });
+    const reader = resp.body.getReader(), decoder = new TextDecoder();
+    let buf = "";
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n\n")) >= 0) {          // one SSE event per blank line
+        const raw = buf.slice(0, i); buf = buf.slice(i + 2);
+        const event = (raw.match(/^event: (.*)$/m) || [])[1];
+        const data = JSON.parse((raw.match(/^data: (.*)$/m) || [, "{}"])[1]);
+        if (event === "session") sessionId = data.session_id;
+        if (event === "status") status.textContent = data.message;
+        if (event === "token") answer.textContent += data.text;
+        if (event === "final") {
+          answer.textContent = data.text;                // guardrail-checked version replaces the stream
+          if (data.text.includes("⚠️")) answer.classList.add("warn");
+          status.remove();
+        }
+        if (event === "error") { status.textContent = "Hata: " + data.message; }
+      }
+    }
+  } finally { send.disabled = false; input.focus(); }
+}
+
+form.addEventListener("submit", (e) => { e.preventDefault(); const q = input.value.trim(); if (q) { input.value = ""; ask(q); } });
+document.querySelectorAll(".examples button").forEach((b) => b.addEventListener("click", () => ask(b.textContent)));
+</script>
+</body>
+</html>

@@ -258,6 +258,8 @@ def record_tool_evidence(
 def output_guardrail(callback_context: CallbackContext, llm_response: LlmResponse) -> LlmResponse | None:
     """after_model_callback: check the final answer against recorded tool evidence."""
     content = llm_response.content
+    if llm_response.partial:
+        return None  # streaming chunk; the aggregated final response is checked instead
     if not content or not content.parts or any(p.function_call for p in content.parts):
         return None  # intermediate step (tool call), not a final answer
     text = "".join(p.text or "" for p in content.parts if not p.thought)
