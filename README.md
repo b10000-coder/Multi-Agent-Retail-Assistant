@@ -223,4 +223,4 @@ What I'd change before running this for real:
 - [x] CI: lint, unit tests, eval regression check (GitHub Actions + Workload Identity Federation)
 - [x] FastAPI with SSE streaming
 - [x] Cloud Run deployment with MCP Toolbox sidecar
-- [ ] Demo GIF
+- [x] Demo GIF
