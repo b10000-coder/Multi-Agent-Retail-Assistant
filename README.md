@@ -1,5 +1,7 @@
 # Multi-Agent Retail Assistant
 
+[![CI](https://github.com/b10000-coder/Multi-Agent-Retail-Assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/b10000-coder/Multi-Agent-Retail-Assistant/actions/workflows/ci.yml)
+
 > 🚧 **Work in progress.** The architecture and design are final; implementation is underway. See [Roadmap](#roadmap) for current status.
 
 A multi-agent AI assistant for retail store operations, built on **Google ADK** and **Vertex AI**.
